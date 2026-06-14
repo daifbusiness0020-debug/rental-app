@@ -1,0 +1,41 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: # Allows you to trigger the build manually
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+
+    - name: Initialize App Project Environment
+      run: |
+        flutter create --org com.rentalcompany.management app
+        rm app/lib/main.dart
+        cp main.dart app/lib/main.dart
+
+    - name: Build APK Release Bundle
+      run: |
+        cd app
+        flutter build apk --release
+
+    - name: Upload APK Download Link Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Rental-Management-App
+        path: app/build/app/outputs/flutter-apk/app-release.apk
